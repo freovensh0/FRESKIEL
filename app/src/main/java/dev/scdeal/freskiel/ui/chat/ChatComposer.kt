@@ -1,6 +1,9 @@
 package dev.scdeal.freskiel.ui.chat
 
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Share
@@ -37,6 +41,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -66,6 +71,7 @@ import coil3.compose.AsyncImage
 import dev.scdeal.freskiel.chat.ChatImageSource
 import dev.scdeal.freskiel.chat.ChatViewModel
 import dev.scdeal.freskiel.chat.ImageEncoder
+import dev.scdeal.freskiel.chat.PendingFile
 import dev.scdeal.freskiel.chat.PendingImage
 import dev.scdeal.freskiel.chat.PendingQueueItem
 import dev.scdeal.freskiel.chat.PendingQueueType
@@ -83,6 +89,7 @@ internal fun PromptControls(
     followUpMode: String,
     inputText: String,
     pendingImages: List<PendingImage>,
+    pendingFiles: List<PendingFile> = emptyList(),
     callbacks: PromptControlsCallbacks,
 ) {
     var deliveryMode by rememberSaveable { mutableStateOf(ActiveRunDeliveryMode.FOLLOW_UP) }
@@ -95,7 +102,7 @@ internal fun PromptControls(
             } else {
                 dispatchActiveRunMessage(inputText, deliveryMode, callbacks)
             }
-        } else if (!isRunActive && pendingImages.isNotEmpty()) {
+        } else if (!isRunActive && (pendingImages.isNotEmpty() || pendingFiles.isNotEmpty())) {
             callbacks.onSendPrompt()
         }
     }
@@ -152,11 +159,14 @@ internal fun PromptControls(
             activeRunDeliveryMode = deliveryMode.takeIf { isRunActive },
             isDispatchingMessage = isDispatchingMessage,
             pendingImages = pendingImages,
+            pendingFiles = pendingFiles,
             onInputTextChanged = callbacks.onInputTextChanged,
             onSubmit = submit,
             onShowCommandPalette = callbacks.onShowCommandPalette,
             onAddImage = callbacks.onAddImage,
             onRemoveImage = callbacks.onRemoveImage,
+            onAddFile = callbacks.onAddFile,
+            onRemoveFile = callbacks.onRemoveFile,
         )
     }
 
@@ -285,11 +295,14 @@ internal fun PromptInputRow(
     activeRunDeliveryMode: ActiveRunDeliveryMode? = null,
     isDispatchingMessage: Boolean = false,
     pendingImages: List<PendingImage>,
+    pendingFiles: List<PendingFile> = emptyList(),
     onInputTextChanged: (String) -> Unit,
     onSubmit: () -> Unit,
     onShowCommandPalette: () -> Unit = {},
     onAddImage: (PendingImage) -> Unit,
     onRemoveImage: (Int) -> Unit,
+    onAddFile: (PendingFile) -> Unit = {},
+    onRemoveFile: (Int) -> Unit = {},
 ) {
     val context = LocalContext.current
     val imageEncoder = remember { ImageEncoder(context) }
@@ -304,6 +317,13 @@ internal fun PromptInputRow(
             }
         }
 
+    val filePickerLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenMultipleDocuments(),
+        ) { uris ->
+            uris.forEach { uri -> onAddFile(readPendingFile(context, uri)) }
+        }
+
     Column(modifier = Modifier.fillMaxWidth().testTag(CHAT_PROMPT_INPUT_ROW_TAG)) {
         // Pending images strip
         if (pendingImages.isNotEmpty()) {
@@ -313,6 +333,13 @@ internal fun PromptInputRow(
                 onImageClick = { uri ->
                     previewImageUri = uri
                 },
+            )
+        }
+
+        if (pendingFiles.isNotEmpty()) {
+            FileAttachmentStrip(
+                files = pendingFiles,
+                onRemove = onRemoveFile,
             )
         }
 
@@ -327,22 +354,35 @@ internal fun PromptInputRow(
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Default),
             enabled = true,
             leadingIcon = {
-                IconButton(
-                    onClick = {
-                        photoPickerLauncher.launch(
-                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                Row {
+                    IconButton(
+                        onClick = {
+                            photoPickerLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                            )
+                        },
+                        enabled = !isStreaming,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AttachFile,
+                            contentDescription = "Attach image",
                         )
-                    },
-                    enabled = !isStreaming,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AttachFile,
-                        contentDescription = "Attach image",
-                    )
+                    }
+                    IconButton(
+                        onClick = {
+                            filePickerLauncher.launch(arrayOf("*/*"))
+                        },
+                        enabled = !isStreaming,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Description,
+                            contentDescription = "Attach file",
+                        )
+                    }
                 }
             },
             trailingIcon = {
-                val canSend = inputText.isNotBlank() || pendingImages.isNotEmpty()
+                val canSend = inputText.isNotBlank() || pendingImages.isNotEmpty() || pendingFiles.isNotEmpty()
                 if (!canSend && !isStreaming) {
                     IconButton(onClick = onShowCommandPalette) {
                         Icon(
@@ -383,6 +423,60 @@ internal fun PromptInputRow(
 }
 
 @Composable
+private fun FileAttachmentStrip(
+    files: List<PendingFile>,
+    onRemove: (Int) -> Unit,
+) {
+    LazyRow(
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        itemsIndexed(
+            items = files,
+            key = { index, file -> "${file.uri}-$index" },
+        ) { index, file ->
+            InputChip(
+                selected = false,
+                onClick = { onRemove(index) },
+                label = { Text(file.name) },
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Remove ${file.name}",
+                        modifier = Modifier.size(16.dp),
+                    )
+                },
+            )
+        }
+    }
+}
+
+internal fun readPendingFile(
+    context: Context,
+    uri: Uri,
+): PendingFile {
+    val (sizeBytes, displayName) =
+        runCatching {
+            context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                if (!cursor.moveToFirst()) {
+                    0L to null
+                } else {
+                    val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    val size = if (sizeIndex >= 0) cursor.getLong(sizeIndex) else 0L
+                    val name = if (nameIndex >= 0) cursor.getString(nameIndex) else null
+                    size to name
+                }
+            }
+        }.getOrNull() ?: (0L to null)
+
+    return PendingFile(
+        uri = uri.toString(),
+        name = displayName ?: uri.lastPathSegment ?: "file",
+        sizeBytes = sizeBytes,
+    )
+}
+
 private fun ImageAttachmentStrip(
     images: List<PendingImage>,
     onRemove: (Int) -> Unit,

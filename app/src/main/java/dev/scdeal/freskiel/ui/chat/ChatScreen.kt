@@ -69,6 +69,7 @@ import dev.scdeal.freskiel.chat.ChatUiState
 import dev.scdeal.freskiel.chat.ChatViewModel
 import dev.scdeal.freskiel.chat.ChatViewModelFactory
 import dev.scdeal.freskiel.chat.ImageEncoder
+import dev.scdeal.freskiel.chat.PendingFile
 import dev.scdeal.freskiel.chat.PendingImage
 import dev.scdeal.freskiel.corerpc.AvailableModel
 import dev.scdeal.freskiel.perf.StreamingFrameMetrics
@@ -163,6 +164,9 @@ internal data class ChatCallbacks(
     // Image attachment callbacks
     val onAddImage: (PendingImage) -> Unit,
     val onRemoveImage: (Int) -> Unit,
+    // File attachment callbacks
+    val onAddFile: (PendingFile) -> Unit = { },
+    val onRemoveFile: (Int) -> Unit = { },
 )
 
 internal data class PromptControlsCallbacks(
@@ -171,6 +175,8 @@ internal data class PromptControlsCallbacks(
     val onShowCommandPalette: () -> Unit,
     val onAddImage: (PendingImage) -> Unit,
     val onRemoveImage: (Int) -> Unit,
+    val onAddFile: (PendingFile) -> Unit = { },
+    val onRemoveFile: (Int) -> Unit = { },
     val onAbort: () -> Unit,
     val onAbortRetry: () -> Unit,
     val onSteer: (String) -> Unit,
@@ -316,6 +322,8 @@ fun ChatRoute(
                 onTreeFilterChanged = chatViewModel::setTreeFilter,
                 onAddImage = chatViewModel::addImage,
                 onRemoveImage = chatViewModel::removeImage,
+                onAddFile = chatViewModel::addFile,
+                onRemoveFile = chatViewModel::removeFile,
             )
         }
 
@@ -560,6 +568,7 @@ private fun ChatScreenContent(
             followUpMode = state.followUpMode,
             inputText = state.inputText,
             pendingImages = state.pendingImages,
+            pendingFiles = state.pendingFiles,
             callbacks =
                 PromptControlsCallbacks(
                     onInputTextChanged = callbacks.onInputTextChanged,
@@ -567,6 +576,8 @@ private fun ChatScreenContent(
                     onShowCommandPalette = callbacks.onShowCommandPalette,
                     onAddImage = callbacks.onAddImage,
                     onRemoveImage = callbacks.onRemoveImage,
+                    onAddFile = callbacks.onAddFile,
+                    onRemoveFile = callbacks.onRemoveFile,
                     onAbort = callbacks.onAbort,
                     onAbortRetry = callbacks.onAbortRetry,
                     onSteer = callbacks.onSteer,

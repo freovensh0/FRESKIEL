@@ -28,6 +28,14 @@ class ImageEncoder(private val context: Context) {
         }
     }
 
+    fun readBytes(uri: Uri): ByteArray? {
+        return try {
+            context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     fun getImageInfo(uri: Uri): PendingImage? {
         return try {
             val mimeType = context.contentResolver.getType(uri) ?: "image/jpeg"

@@ -12,6 +12,7 @@ const DEFAULT_SESSION_DIRECTORY = path.join(os.homedir(), ".pi", "agent", "sessi
 const DEFAULT_STATE_DIRECTORY = path.join(os.homedir(), ".pi-mobile");
 const DEFAULT_WEBSOCKET_MAX_PAYLOAD_BYTES = 16 * 1024 * 1024;
 const DEFAULT_IMPORT_MAX_BYTES = 10 * 1024 * 1024;
+const DEFAULT_UPLOAD_MAX_BYTES = 10 * 1024 * 1024;
 const DEFAULT_PI_COMMAND = "pi";
 
 export interface BridgeConfig {
@@ -27,6 +28,7 @@ export interface BridgeConfig {
     enableHealthEndpoint: boolean;
     websocketMaxPayloadBytes: number;
     importMaxBytes: number;
+    uploadMaxBytes: number;
     piCommand: string;
 }
 
@@ -52,6 +54,11 @@ export function parseBridgeConfig(env: NodeJS.ProcessEnv = process.env): BridgeC
         DEFAULT_IMPORT_MAX_BYTES,
     );
     const piCommand = env.BRIDGE_PI_COMMAND?.trim() || DEFAULT_PI_COMMAND;
+    const uploadMaxBytes = parsePositiveInteger(
+        "BRIDGE_UPLOAD_MAX_BYTES",
+        env.BRIDGE_UPLOAD_MAX_BYTES,
+        DEFAULT_UPLOAD_MAX_BYTES,
+    );
 
     return {
         host,
@@ -66,6 +73,7 @@ export function parseBridgeConfig(env: NodeJS.ProcessEnv = process.env): BridgeC
         enableHealthEndpoint,
         websocketMaxPayloadBytes,
         importMaxBytes,
+        uploadMaxBytes,
         piCommand,
     };
 }

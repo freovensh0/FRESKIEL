@@ -790,6 +790,35 @@ class RpcSessionController(
         }
     }
 
+    override suspend fun uploadFile(
+        fileName: String,
+        base64Data: String,
+    ): Result<UploadedFile> {
+        return mutex.withLock {
+            runCatching {
+                val connection = ensureActiveConnection()
+                val bridgePayload =
+                    buildJsonObject {
+                        put("type", BRIDGE_UPLOAD_FILE_TYPE)
+                        put("name", fileName)
+                        put("data", base64Data)
+                    }
+
+                val bridgeResponse =
+                    connection.requestBridge(
+                        payload = bridgePayload,
+                        expectedType = BRIDGE_FILE_UPLOADED_TYPE,
+                    )
+
+                UploadedFile(
+                    path = bridgeResponse.payload.stringField("path") ?: error("Upload did not return a path"),
+                    name = bridgeResponse.payload.stringField("name") ?: fileName,
+                    sizeBytes = bridgeResponse.payload.intField("sizeBytes")?.toLong() ?: 0L,
+                )
+            }
+        }
+    }
+
     override suspend fun executeBash(
         command: String,
         timeoutMs: Int?,
@@ -1316,6 +1345,8 @@ class RpcSessionController(
         private const val BRIDGE_GET_SESSION_FRESHNESS_TYPE = "bridge_get_session_freshness"
         private const val BRIDGE_SESSION_FRESHNESS_TYPE = "bridge_session_freshness"
         private const val BRIDGE_IMPORT_SESSION_JSONL_TYPE = "bridge_import_session_jsonl"
+        private const val BRIDGE_UPLOAD_FILE_TYPE = "bridge_upload_file"
+        private const val BRIDGE_FILE_UPLOADED_TYPE = "bridge_file_uploaded"
         private const val BRIDGE_SESSION_IMPORTED_TYPE = "bridge_session_imported"
         private const val BRIDGE_NAVIGATE_TREE_TYPE = "bridge_navigate_tree"
         private const val BRIDGE_TREE_NAVIGATION_RESULT_TYPE = "bridge_tree_navigation_result"

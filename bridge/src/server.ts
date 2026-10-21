@@ -9,6 +9,7 @@ import type { Logger } from "pino";
 import { WebSocket as WsWebSocket, WebSocketServer, type RawData, type WebSocket } from "ws";
 
 import type { BridgeConfig } from "./config.js";
+import { storeUploadedFile } from "./file-upload.js";
 import type { PiProcessManager } from "./process-manager.js";
 import { createPiProcessManager } from "./process-manager.js";
 import type { SessionIndexer, SessionTreeFilter } from "./session-indexer.js";
@@ -97,6 +98,8 @@ const BRIDGE_SESSION_FRESHNESS_TYPE = "bridge_session_freshness";
 const BRIDGE_IMPORT_SESSION_JSONL_TYPE = "bridge_import_session_jsonl";
 const BRIDGE_SESSION_IMPORTED_TYPE = "bridge_session_imported";
 const BRIDGE_SESSION_INVALIDATED_TYPE = "bridge_session_invalidated";
+const BRIDGE_UPLOAD_FILE_TYPE = "bridge_upload_file";
+const BRIDGE_FILE_UPLOADED_TYPE = "bridge_file_uploaded";
 const BRIDGE_INTERNAL_RPC_TIMEOUT_MS = 10_000;
 const PI_VERSION_PROBE_TIMEOUT_MS = 3_000;
 
@@ -881,6 +884,57 @@ async function handleBridgeControlMessage(
                     createBridgeErrorEnvelope(
                         "session_import_failed",
                         "Failed to import session",
+                    ),
+                ),
+            );
+        }
+
+        return;
+    }
+
+    if (messageType === BRIDGE_UPLOAD_FILE_TYPE) {
+        const name = typeof payload.name === "string" ? payload.name : undefined;
+        const data = typeof payload.data === "string" ? payload.data : undefined;
+
+        if (!name || !data) {
+            client.send(
+                JSON.stringify(
+                    createBridgeErrorEnvelope(
+                        "invalid_upload_payload",
+                        "name and data must be non-empty strings",
+                    ),
+                ),
+            );
+            return;
+        }
+
+        const stateDirectory = config.stateDirectory ?? path.join(process.env.HOME ?? ".", ".pi-mobile");
+
+        try {
+            const uploaded = await storeUploadedFile({
+                stateDirectory,
+                name,
+                dataBase64: data,
+                maxBytes: config.uploadMaxBytes,
+            });
+
+            client.send(
+                JSON.stringify(
+                    createBridgeEnvelope({
+                        type: BRIDGE_FILE_UPLOADED_TYPE,
+                        ...uploaded,
+                    }),
+                ),
+            );
+        } catch (error) {
+            logger.error(
+                `Failed to store an uploaded file: ${error instanceof Error ? error.message : "unknown"}`,
+            );
+            client.send(
+                JSON.stringify(
+                    createBridgeErrorEnvelope(
+                        "file_upload_failed",
+                        "Failed to store the uploaded file",
                     ),
                 ),
             );

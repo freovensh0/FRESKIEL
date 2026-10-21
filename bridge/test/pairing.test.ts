@@ -16,6 +16,7 @@ describe("host pairing payload", () => {
             enableHealthEndpoint: true,
             websocketMaxPayloadBytes: 16_777_216,
             importMaxBytes: 10_485_760,
+            uploadMaxBytes: 10_485_760,
             piCommand: "pi",
             shareOrigin: "https://workstation.example.test",
         };

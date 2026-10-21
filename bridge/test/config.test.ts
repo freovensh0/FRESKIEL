@@ -22,6 +22,7 @@ describe("parseBridgeConfig", () => {
             enableHealthEndpoint: true,
             websocketMaxPayloadBytes: 16 * 1024 * 1024,
             importMaxBytes: 10 * 1024 * 1024,
+            uploadMaxBytes: 10 * 1024 * 1024,
             piCommand: "pi",
         });
     });

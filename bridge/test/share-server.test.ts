@@ -149,7 +149,7 @@ async function startFixture(existingRoot?: string, explicitStateDirectory?: stri
         host: "127.0.0.1", port: 0, logLevel: "silent", authToken: "test-token",
         processIdleTtlMs: 300_000, reconnectGraceMs: 0, sessionDirectory: sessionsDirectory, stateDirectory,
         shareOrigin: "https://share.example.test", enableHealthEndpoint: true,
-        websocketMaxPayloadBytes: 16 * 1024 * 1024, importMaxBytes: 10 * 1024 * 1024, piCommand: "pi",
+        websocketMaxPayloadBytes: 16 * 1024 * 1024, importMaxBytes: 10 * 1024 * 1024, uploadMaxBytes: 10 * 1024 * 1024, piCommand: "pi",
     };
     const server = createBridgeServer(config, createLogger("silent"), { probePiVersion: async () => "0.80.6" });
     const info = await server.start();

@@ -137,6 +137,11 @@ interface SessionController {
         jsonlContent: String,
     ): Result<String?>
 
+    suspend fun uploadFile(
+        fileName: String,
+        base64Data: String,
+    ): Result<UploadedFile>
+
     suspend fun executeBash(
         command: String,
         timeoutMs: Int? = null,
@@ -161,6 +166,15 @@ interface SessionController {
 
     suspend fun setFollowUpMode(mode: String): Result<Unit>
 }
+
+/**
+ * A file the phone uploaded to the bridge machine. The path is the one the agent reads.
+ */
+data class UploadedFile(
+    val path: String,
+    val name: String,
+    val sizeBytes: Long,
+)
 
 /**
  * Information about a forkable message from get_fork_messages response.

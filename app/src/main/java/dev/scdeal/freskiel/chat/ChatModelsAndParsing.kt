@@ -75,6 +75,8 @@ data class ChatUiState(
     val treeErrorMessage: String? = null,
     // Image attachments
     val pendingImages: List<PendingImage> = emptyList(),
+    // File attachments, uploaded to the bridge when the prompt is sent
+    val pendingFiles: List<PendingFile> = emptyList(),
 )
 
 data class PendingImage(
@@ -82,6 +84,12 @@ data class PendingImage(
     val mimeType: String,
     val sizeBytes: Long,
     val displayName: String?,
+)
+
+data class PendingFile(
+    val uri: String,
+    val name: String,
+    val sizeBytes: Long,
 )
 
 data class PendingQueueItem(

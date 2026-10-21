@@ -1,6 +1,8 @@
 package dev.scdeal.freskiel.chat
 
 import android.net.Uri
+import android.util.Base64
+import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -32,6 +34,7 @@ import dev.scdeal.freskiel.perf.PerformanceMetrics
 import dev.scdeal.freskiel.sessions.SessionController
 import dev.scdeal.freskiel.sessions.SessionFreshnessFingerprint
 import dev.scdeal.freskiel.sessions.SlashCommandInfo
+import dev.scdeal.freskiel.sessions.UploadedFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -140,7 +143,8 @@ class ChatViewModel(
         val currentState = _uiState.value
         val message = currentState.inputText.trim()
         val pendingImages = currentState.pendingImages
-        if (message.isEmpty() && pendingImages.isEmpty()) return
+        val pendingFiles = currentState.pendingFiles
+        if (message.isEmpty() && pendingImages.isEmpty() && pendingFiles.isEmpty()) return
 
         if (handleSlashInvocationIfNeeded(message = message, pendingImages = pendingImages)) {
             return
@@ -148,19 +152,34 @@ class ChatViewModel(
 
         preparePromptDispatch()
         _uiState.update { it.copy(isDispatchingMessage = true) }
-        val optimisticUserId = addOptimisticUserMessage(message = message, pendingImages = pendingImages)
+        val optimisticUserId =
+            addOptimisticUserMessage(
+                message = message.withPendingFileNames(pendingFiles),
+                pendingImages = pendingImages,
+            )
 
         viewModelScope.launch {
             val imagePayloads = encodePendingImages(pendingImages)
 
-            if (message.isEmpty() && imagePayloads.isEmpty()) {
+            if (message.isEmpty() && imagePayloads.isEmpty() && pendingFiles.isEmpty()) {
                 handleImageEncodingFailure(optimisticUserId)
                 return@launch
             }
 
-            val clearedDraftState = clearDraftAfterPromptDispatch(currentState)
+            val uploadedFiles = uploadPendingFiles(pendingFiles)
+            if (uploadedFiles.isFailure) {
+                _uiState.update { it.copy(isDispatchingMessage = false) }
+                discardPendingLocalUserItem(optimisticUserId)
+                _uiState.update {
+                    it.copy(errorMessage = uploadedFiles.exceptionOrNull()?.message ?: "File upload failed")
+                }
+                return@launch
+            }
 
-            val result = sessionController.sendPrompt(message, imagePayloads)
+            val clearedDraftState = clearDraftAfterPromptDispatch(currentState)
+            val promptText = message.withUploadedFiles(uploadedFiles.getOrDefault(emptyList()))
+
+            val result = sessionController.sendPrompt(promptText, imagePayloads)
             _uiState.update { it.copy(isDispatchingMessage = false) }
             if (result.isFailure) {
                 handleSendPromptFailure(
@@ -171,6 +190,25 @@ class ChatViewModel(
                 )
             }
         }
+    }
+
+    private suspend fun uploadPendingFiles(pendingFiles: List<PendingFile>): Result<List<UploadedFile>> {
+        if (pendingFiles.isEmpty()) return Result.success(emptyList())
+        val encoder = imageEncoder ?: return Result.failure(IllegalStateException("File upload is not available"))
+
+        val uploaded = mutableListOf<UploadedFile>()
+        for (file in pendingFiles) {
+            val bytes =
+                withContext(Dispatchers.IO) {
+                    encoder.readBytes(file.uri.toUri())
+                } ?: return Result.failure(IllegalStateException("Could not read ${file.name}"))
+
+            val base64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
+            val result = sessionController.uploadFile(file.name, base64)
+            val uploadedFile = result.getOrElse { return Result.failure(it) }
+            uploaded += uploadedFile
+        }
+        return Result.success(uploaded)
     }
 
     private fun handleSlashInvocationIfNeeded(
@@ -238,16 +276,20 @@ class ChatViewModel(
     private fun clearDraftAfterPromptDispatch(currentState: ChatUiState): DraftClearState {
         var inputWasCleared = false
         var imagesWereCleared = false
+        var filesWereCleared = false
 
         _uiState.update { state ->
             val shouldClearInput = state.inputText == currentState.inputText
             val shouldClearImages = state.pendingImages == currentState.pendingImages
+            val shouldClearFiles = state.pendingFiles == currentState.pendingFiles
             inputWasCleared = shouldClearInput
             imagesWereCleared = shouldClearImages
+            filesWereCleared = shouldClearFiles
 
             state.copy(
                 inputText = if (shouldClearInput) "" else state.inputText,
                 pendingImages = if (shouldClearImages) emptyList() else state.pendingImages,
+                pendingFiles = if (shouldClearFiles) emptyList() else state.pendingFiles,
                 errorMessage = null,
             )
         }
@@ -2737,6 +2779,22 @@ class ChatViewModel(
         )
     }
 
+    fun addFile(pendingFile: PendingFile) {
+        if (pendingFile.sizeBytes > MAX_FILE_SIZE_BYTES) {
+            _uiState.update { it.copy(errorMessage = "File too large (max 10MB)") }
+            return
+        }
+        _uiState.update { state ->
+            state.copy(pendingFiles = state.pendingFiles + pendingFile)
+        }
+    }
+
+    fun removeFile(index: Int) {
+        _uiState.update { state ->
+            state.copy(pendingFiles = state.pendingFiles.filterIndexed { i, _ -> i != index })
+        }
+    }
+
     fun addImage(pendingImage: PendingImage) {
         if (pendingImage.sizeBytes > ImageEncoder.MAX_IMAGE_SIZE_BYTES) {
             _uiState.update { it.copy(errorMessage = "Image too large (max 5MB)") }
@@ -2956,6 +3014,7 @@ class ChatViewModel(
         private const val BASH_HISTORY_SIZE = 10
         private const val MAX_NOTIFICATIONS = 6
         private const val MAX_PENDING_QUEUE_ITEMS = 20
+        private const val MAX_FILE_SIZE_BYTES = 10L * 1024 * 1024
         private const val THINKING_DIAGNOSTICS_LOG_TAG = "ThinkingDiagnostics"
         private const val STREAMING_DIAGNOSTICS_LOG_TAG = "StreamingDiagnostics"
         private const val SESSION_COHERENCY_WARNING_MESSAGE =
