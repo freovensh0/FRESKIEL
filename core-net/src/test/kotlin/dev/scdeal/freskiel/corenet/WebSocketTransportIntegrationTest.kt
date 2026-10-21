@@ -64,7 +64,7 @@ class WebSocketTransportIntegrationTest {
             } finally {
                 collectorJob.cancel()
                 transport.disconnect()
-                server.shutdown()
+                server.close()
             }
         }
 
@@ -117,7 +117,7 @@ class WebSocketTransportIntegrationTest {
                 }
             } finally {
                 transport.disconnect()
-                server.shutdown()
+                server.close()
             }
         }
     }
@@ -183,7 +183,7 @@ class WebSocketTransportIntegrationTest {
             } finally {
                 collectorJob.cancel()
                 transport.disconnect()
-                server.shutdown()
+                server.close()
             }
         }
 
