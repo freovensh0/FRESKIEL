@@ -39,8 +39,11 @@ class FreskielVoiceInteractionSession(
         content: AssistContent?,
     ) {
         screenText =
-            structure?.windowNodes
-                ?.flatMap { it.rootViewNode.collectText() }
+            structure
+                ?.let { assist ->
+                    (0 until assist.windowNodeCount)
+                        .flatMap { assist.getWindowNodeAt(it).rootViewNode.collectText() }
+                }
                 ?.distinct()
                 ?.joinToString("\n")
                 ?.take(SCREEN_TEXT_LIMIT)
@@ -101,7 +104,7 @@ class FreskielVoiceInteractionSession(
                 text?.toString(),
                 contentDescription?.toString(),
             ).map(String::trim).filter(String::isNotEmpty)
-        return own + children.flatMap { it.collectText() }
+        return own + (0 until childCount).flatMap { getChildAt(it).collectText() }
     }
 
     private companion object {
