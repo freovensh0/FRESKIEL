@@ -48,7 +48,7 @@ class FakeSessionController : SessionController {
     var uploadFileCallCount: Int = 0
     var lastUploadedFileName: String? = null
     var lastUploadedFileData: String? = null
-    var lastResumedSession: LastSession? = null
+    var lastResumed: LastSession? = null
     var uploadFileResult: Result<UploadedFile> =
         Result.success(
             UploadedFile(
@@ -373,7 +373,7 @@ class FakeSessionController : SessionController {
 
     override suspend fun getClientId(): String = clientId
 
-    override fun getLastResumedSession(): LastSession? = lastResumedSession
+    override fun getLastResumedSession(): LastSession? = lastResumed
 
     override suspend fun uploadFile(
         fileName: String,
