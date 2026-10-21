@@ -7,7 +7,8 @@ import org.junit.Test
 class PromptAttachmentsTest {
     @Test
     fun `pending file names are listed under the message`() {
-        val text = "look at this".withPendingFileNames(
+        val text =
+            "look at this".withPendingFileNames(
             listOf(
                 PendingFile(uri = "content://a", name = "a.txt", sizeBytes = 1),
                 PendingFile(uri = "content://b", name = "b.txt", sizeBytes = 2),

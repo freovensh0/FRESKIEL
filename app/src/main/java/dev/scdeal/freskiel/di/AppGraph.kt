@@ -13,7 +13,6 @@ import dev.scdeal.freskiel.hosts.SharedPreferencesHostProfileStore
 import dev.scdeal.freskiel.sessions.BridgeSessionIndexRemoteDataSource
 import dev.scdeal.freskiel.sessions.BridgeSessionShareRemoteDataSource
 import dev.scdeal.freskiel.sessions.ClientIdentityStore
-import dev.scdeal.freskiel.sessions.LastSession
 import dev.scdeal.freskiel.sessions.RpcSessionController
 import dev.scdeal.freskiel.sessions.SessionController
 import dev.scdeal.freskiel.sessions.SessionCwdPreferenceStore
