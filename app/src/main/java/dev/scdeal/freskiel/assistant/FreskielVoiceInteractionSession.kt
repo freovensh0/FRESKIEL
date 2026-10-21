@@ -49,7 +49,9 @@ class FreskielVoiceInteractionSession(
             val file = File(context.cacheDir, "$SCREENSHOT_DIR/$SCREENSHOT_NAME")
             file.parentFile?.mkdirs()
             runCatching {
-                FileOutputStream(file).use { screenshot.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                FileOutputStream(file).use {
+                    screenshot.compress(Bitmap.CompressFormat.PNG, SCREENSHOT_QUALITY, it)
+                }
             }.onSuccess {
                 screenshotPath = file.absolutePath
             }.onFailure {
@@ -103,5 +105,6 @@ class FreskielVoiceInteractionSession(
         const val LAUNCH_DELAY_MS = 250L
         const val SCREENSHOT_DIR = "shared-images"
         const val SCREENSHOT_NAME = "assist-screen.png"
+        const val SCREENSHOT_QUALITY = 100
     }
 }

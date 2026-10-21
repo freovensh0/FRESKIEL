@@ -188,6 +188,7 @@ private fun DrawerDestinationItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod", "MaxLineLength")
 @Composable
+@Suppress("CyclomaticComplexMethod")
 fun PiMobileApp(appGraph: AppGraph) {
     val context = LocalContext.current
     val settingsPrefs =
