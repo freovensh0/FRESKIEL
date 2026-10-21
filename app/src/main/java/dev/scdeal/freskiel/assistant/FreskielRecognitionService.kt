@@ -22,6 +22,5 @@ class FreskielRecognitionService : RecognitionService() {
     }
 
     override fun onStopListening(listener: RecognitionService.Callback?) {
-        Unit
     }
 }

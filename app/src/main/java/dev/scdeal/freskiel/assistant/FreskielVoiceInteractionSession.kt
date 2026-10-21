@@ -33,7 +33,7 @@ class FreskielVoiceInteractionSession(
         setDisabledShowContext(0)
     }
 
-    @Suppress("DEPRECATION")
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
     override fun onHandleAssist(
         state: Bundle?,
         structure: AssistStructure?,

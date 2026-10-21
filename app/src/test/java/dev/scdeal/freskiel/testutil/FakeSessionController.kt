@@ -12,6 +12,7 @@ import dev.scdeal.freskiel.coresessions.SessionRecord
 import dev.scdeal.freskiel.hosts.HostProfile
 import dev.scdeal.freskiel.sessions.ActiveSessionState
 import dev.scdeal.freskiel.sessions.ForkableMessage
+import dev.scdeal.freskiel.sessions.LastSession
 import dev.scdeal.freskiel.sessions.ModelInfo
 import dev.scdeal.freskiel.sessions.SessionBootstrapSnapshot
 import dev.scdeal.freskiel.sessions.SessionController
@@ -20,6 +21,7 @@ import dev.scdeal.freskiel.sessions.SessionSyncMetrics
 import dev.scdeal.freskiel.sessions.SessionTreeSnapshot
 import dev.scdeal.freskiel.sessions.SlashCommandInfo
 import dev.scdeal.freskiel.sessions.TransportPreference
+import dev.scdeal.freskiel.sessions.UploadedFile
 import dev.scdeal.freskiel.sessions.TreeNavigationResult
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -43,6 +45,18 @@ class FakeSessionController : SessionController {
     var getCommandsCallCount: Int = 0
     var getLastAssistantTextCallCount: Int = 0
     var importSessionJsonlCallCount: Int = 0
+    var uploadFileCallCount: Int = 0
+    var lastUploadedFileName: String? = null
+    var lastUploadedFileData: String? = null
+    var lastResumedSession: LastSession? = null
+    var uploadFileResult: Result<UploadedFile> =
+        Result.success(
+            UploadedFile(
+                path = "/tmp/uploads/fake.txt",
+                name = "fake.txt",
+                sizeBytes = 4,
+            ),
+        )
     var sendPromptCallCount: Int = 0
     var steerCallCount: Int = 0
     var followUpCallCount: Int = 0
@@ -358,6 +372,18 @@ class FakeSessionController : SessionController {
     }
 
     override suspend fun getClientId(): String = clientId
+
+    override fun getLastResumedSession(): LastSession? = lastResumedSession
+
+    override suspend fun uploadFile(
+        fileName: String,
+        base64Data: String,
+    ): Result<UploadedFile> {
+        uploadFileCallCount += 1
+        lastUploadedFileName = fileName
+        lastUploadedFileData = base64Data
+        return uploadFileResult
+    }
 
     override suspend fun getCommands(): Result<List<SlashCommandInfo>> {
         getCommandsCallCount += 1
