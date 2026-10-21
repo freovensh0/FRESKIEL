@@ -14,7 +14,7 @@ class FreskielRecognitionService : RecognitionService() {
         recognizerIntent: Intent?,
         listener: RecognitionService.Callback?,
     ) {
-        listener?.error(SpeechRecognizer.ERROR_CANNOT_CHECK_SUPPORT)
+        listener?.error(SpeechRecognizer.ERROR_CLIENT)
     }
 
     override fun onCancel(listener: RecognitionService.Callback?) {
