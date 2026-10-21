@@ -22,6 +22,8 @@ English string stays next to it.
   cache, are never persisted, logged, or uploaded anywhere except the paired bridge.
 - Tokens live in the Android Keystore. They must not enter preferences, backups, logs or fixtures.
   Never print authorization headers or `.env` contents.
+- One signing key signs every build, so updates install over each other. The key stays outside the
+  repository, in the CI secrets and in the operator's Gradle home. Never commit a keystore.
 
 ## Shape of the code
 

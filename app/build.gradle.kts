@@ -8,6 +8,14 @@ plugins {
     id("org.jetbrains.kotlinx.kover")
 }
 
+// The signing key is not in the repository. CI reads it from the secrets, a local build from
+// FRESKIEL_KEYSTORE_PATH and the passwords in ~/.gradle/gradle.properties.
+val keystorePath = providers.gradleProperty("freskiel.keystorePath").orNull ?: System.getenv("FRESKIEL_KEYSTORE_PATH")
+val keystorePassword = providers.gradleProperty("freskiel.keystorePassword").orNull ?: System.getenv("FRESKIEL_KEYSTORE_PASSWORD")
+val keyAlias = providers.gradleProperty("freskiel.keyAlias").orNull ?: System.getenv("FRESKIEL_KEY_ALIAS")
+val keyPassword = providers.gradleProperty("freskiel.keyPassword").orNull ?: System.getenv("FRESKIEL_KEY_PASSWORD")
+val hasSigningKey = listOf(keystorePath, keystorePassword, keyAlias, keyPassword).all { !it.isNullOrBlank() }
+
 android {
     namespace = "dev.scdeal.freskiel"
     compileSdk = 37
@@ -23,8 +31,24 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        if (hasSigningKey) {
+            create("freskiel") {
+                storeFile = file(keystorePath!!)
+                storePassword = keystorePassword
+                keyAlias = keyAlias
+                keyPassword = keyPassword
+            }
+        }
+    }
+
     buildTypes {
+        debug {
+            // One key for every build, so an update installs over the previous one.
+            signingConfig = signingConfigs.findByName("freskiel") ?: signingConfigs.getByName("debug")
+        }
         release {
+            signingConfig = signingConfigs.findByName("freskiel")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

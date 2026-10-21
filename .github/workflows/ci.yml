@@ -34,6 +34,19 @@ jobs:
             - uses: android-actions/setup-android@v4
             - name: Install Android SDK 37
               run: sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
+            - name: Restore the signing key
+              env:
+                  FRESKIEL_KEYSTORE_BASE64: ${{ secrets.FRESKIEL_KEYSTORE_BASE64 }}
+                  FRESKIEL_KEYSTORE_PASSWORD: ${{ secrets.FRESKIEL_KEYSTORE_PASSWORD }}
+                  FRESKIEL_KEY_ALIAS: ${{ secrets.FRESKIEL_KEY_ALIAS }}
+                  FRESKIEL_KEY_PASSWORD: ${{ secrets.FRESKIEL_KEY_PASSWORD }}
+              run: |
+                  mkdir -p "$RUNNER_TEMP/keystore"
+                  printf '%s' "$FRESKIEL_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/keystore/freskiel.jks"
+                  echo "FRESKIEL_KEYSTORE_PATH=$RUNNER_TEMP/keystore/freskiel.jks" >> "$GITHUB_ENV"
+                  echo "FRESKIEL_KEYSTORE_PASSWORD=$FRESKIEL_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+                  echo "FRESKIEL_KEY_ALIAS=$FRESKIEL_KEY_ALIAS" >> "$GITHUB_ENV"
+                  echo "FRESKIEL_KEY_PASSWORD=$FRESKIEL_KEY_PASSWORD" >> "$GITHUB_ENV"
             - name: Verify toolchain
               run: |
                   java -version

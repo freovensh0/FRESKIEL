@@ -44,6 +44,19 @@ adb install -r /tmp/freskiel/app-debug.apk
 
 The development machine does not need an Android SDK; CI is the build machine.
 
+## Signing
+
+Every build is signed with one key, so a new APK installs over the previous one without a
+uninstall. The key lives outside the repository:
+
+- CI reads it from the repository secrets `FRESKIEL_KEYSTORE_BASE64`, `FRESKIEL_KEYSTORE_PASSWORD`,
+  `FRESKIEL_KEY_ALIAS` and `FRESKIEL_KEY_PASSWORD`.
+- A local build reads the same values from `FRESKIEL_KEYSTORE_PATH` and friends, or from
+  `freskiel.keystorePath` in `~/.gradle/gradle.properties`.
+
+The first build with this key needs the old app removed once, because the previous debug builds
+were signed with the throwaway key of the build machine.
+
 ## Assistant role
 
 Set FRESKIEL under **Settings → Apps → Default apps → Digital assistant app**. The assist gesture
