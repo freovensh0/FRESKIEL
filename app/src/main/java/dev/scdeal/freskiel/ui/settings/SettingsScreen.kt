@@ -1,5 +1,8 @@
 package dev.scdeal.freskiel.ui.settings
 
+import android.content.Intent
+import android.os.Build
+import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -125,10 +128,44 @@ private fun SettingsScreen(
             onFollowUpModeSelected = viewModel::setFollowUpMode,
         )
 
+        AssistantCard()
+
         ChatHelpCard()
 
         AppInfoCard(
             version = uiState.appVersion,
+        )
+    }
+}
+
+@Composable
+private fun AssistantCard() {
+    val context = LocalContext.current
+    PiCard(
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text(
+            text = "Assistant",
+            style = MaterialTheme.typography.titleMedium,
+        )
+        Text(
+            text = "Set FRESKIEL as the digital assistant to reach the composer from the assist gesture. " +
+                "The focused screen's text and one screenshot are attached when the gesture starts.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        PiButton(
+            label = "Open assistant settings",
+            onClick = {
+                val intent =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)
+                    } else {
+                        Intent(Settings.ACTION_VOICE_INPUT_SETTINGS)
+                    }
+                runCatching { context.startActivity(intent) }
+            },
+            modifier = Modifier.padding(top = PiSpacing.sm),
         )
     }
 }

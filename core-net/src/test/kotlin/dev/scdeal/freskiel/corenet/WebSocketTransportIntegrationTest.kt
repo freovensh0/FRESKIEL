@@ -2,10 +2,10 @@ package dev.scdeal.freskiel.corenet
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -187,16 +187,12 @@ class WebSocketTransportIntegrationTest {
             }
         }
 
-    private suspend fun CoroutineScope.collectInbound(transport: WebSocketTransport): Pair<Channel<String>, Job> {
+    private fun CoroutineScope.collectInbound(transport: WebSocketTransport): Pair<Channel<String>, Job> {
         val messages = Channel<String>(Channel.UNLIMITED)
-        val subscribed = CompletableDeferred<Unit>()
         val job =
-            launch {
-                transport.inboundMessages
-                    .onSubscription { subscribed.complete(Unit) }
-                    .collect { messages.send(it) }
+            launch(start = CoroutineStart.UNDISPATCHED) {
+                transport.inboundMessages.collect { messages.send(it) }
             }
-        subscribed.await()
         return messages to job
     }
 
