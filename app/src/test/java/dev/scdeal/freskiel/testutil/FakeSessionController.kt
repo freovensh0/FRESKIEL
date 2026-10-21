@@ -21,8 +21,8 @@ import dev.scdeal.freskiel.sessions.SessionSyncMetrics
 import dev.scdeal.freskiel.sessions.SessionTreeSnapshot
 import dev.scdeal.freskiel.sessions.SlashCommandInfo
 import dev.scdeal.freskiel.sessions.TransportPreference
-import dev.scdeal.freskiel.sessions.UploadedFile
 import dev.scdeal.freskiel.sessions.TreeNavigationResult
+import dev.scdeal.freskiel.sessions.UploadedFile
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
