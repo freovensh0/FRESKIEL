@@ -26,7 +26,10 @@ class FreskielVoiceInteractionSession(
     private var screenshotPath: String? = null
     private var launched = false
 
-    override fun onShow(args: Bundle?, showFlags: Int) {
+    override fun onShow(
+        args: Bundle?,
+        showFlags: Int,
+    ) {
         setDisabledShowContext(0)
     }
 
@@ -35,11 +38,13 @@ class FreskielVoiceInteractionSession(
         structure: AssistStructure?,
         content: AssistContent?,
     ) {
-        screenText = structure?.windowNodes?.flatMap { it.rootViewNode.collectText() }
-            ?.distinct()
-            ?.joinToString("\n")
-            ?.take(SCREEN_TEXT_LIMIT)
-            ?.takeIf(String::isNotBlank)
+        screenText =
+            structure?.windowNodes
+                ?.flatMap { it.rootViewNode.collectText() }
+                ?.distinct()
+                ?.joinToString("\n")
+                ?.take(SCREEN_TEXT_LIMIT)
+                ?.takeIf(String::isNotBlank)
         scheduleLaunch()
     }
 

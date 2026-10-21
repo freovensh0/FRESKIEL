@@ -5,6 +5,5 @@ import android.service.voice.VoiceInteractionSession
 import android.service.voice.VoiceInteractionSessionService
 
 class FreskielVoiceInteractionSessionService : VoiceInteractionSessionService() {
-    override fun onNewSession(args: Bundle?): VoiceInteractionSession =
-        FreskielVoiceInteractionSession(this)
+    override fun onNewSession(args: Bundle?): VoiceInteractionSession = FreskielVoiceInteractionSession(this)
 }
