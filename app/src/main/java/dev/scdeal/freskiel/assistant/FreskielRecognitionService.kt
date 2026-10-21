@@ -21,6 +21,7 @@ class FreskielRecognitionService : RecognitionService() {
         listener?.error(SpeechRecognizer.ERROR_CLIENT)
     }
 
+    @Suppress("EmptyFunctionBlock")
     override fun onStopListening(listener: RecognitionService.Callback?) {
     }
 }
