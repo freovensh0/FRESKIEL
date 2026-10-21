@@ -58,7 +58,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import dev.scdeal.freskiel.assistant.AssistPayload
 import dev.scdeal.freskiel.di.AppGraph
+import dev.scdeal.freskiel.sessions.SessionController
 import dev.scdeal.freskiel.sessions.ShareNavigationState
 import dev.scdeal.freskiel.ui.chat.ChatRoute
 import dev.scdeal.freskiel.ui.hosts.HostsRoute
@@ -188,7 +190,6 @@ private fun DrawerDestinationItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod", "MaxLineLength")
 @Composable
-@Suppress("CyclomaticComplexMethod")
 fun PiMobileApp(appGraph: AppGraph) {
     val context = LocalContext.current
     val settingsPrefs =
@@ -245,11 +246,7 @@ fun PiMobileApp(appGraph: AppGraph) {
             }
         }
 
-        LaunchedEffect(assistPayload) {
-            if (assistPayload != null && appGraph.sessionController.activeSession.value?.sessionKey != null) {
-                navigateTo("chat")
-            }
-        }
+        AssistNavigationEffect(assistPayload, appGraph.sessionController) { navigateTo("chat") }
 
         LaunchedEffect(shareCoordinator) {
             shareCoordinator.state.collect { state ->
@@ -421,6 +418,19 @@ fun PiMobileApp(appGraph: AppGraph) {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun AssistNavigationEffect(
+    payload: AssistPayload?,
+    sessionController: SessionController,
+    onOpenChat: () -> Unit,
+) {
+    LaunchedEffect(payload) {
+        if (payload != null && sessionController.activeSession.value?.sessionKey != null) {
+            onOpenChat()
         }
     }
 }
