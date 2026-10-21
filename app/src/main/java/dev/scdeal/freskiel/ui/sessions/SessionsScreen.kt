@@ -188,7 +188,7 @@ internal data class SessionsCallbacks(
 )
 
 @Composable
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 internal fun SessionsScreen(
     state: SessionsUiState,
     statusMessage: String?,
