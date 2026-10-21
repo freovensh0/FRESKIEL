@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">pi-mobile</string>
+    <string name="app_name">FRESKIEL</string>
     <string name="diff_viewer_copy">Copy</string>
     <string name="diff_viewer_collapse">Collapse</string>
     <string name="diff_viewer_loading">Preparing diff preview…</string>

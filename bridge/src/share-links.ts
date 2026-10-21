@@ -49,7 +49,7 @@ export function buildCustomShareUri(reference: string, authority: ShareAuthority
     if (!Number.isSafeInteger(authority.port) || authority.port < 1 || authority.port > 65_535) {
         throw new Error("Invalid share authority port");
     }
-    return `pimobile://open/v1/${reference}?host=${host}&port=${authority.port}&tls=${authority.useTls ? 1 : 0}`;
+    return `freskiel://open/v1/${reference}?host=${host}&port=${authority.port}&tls=${authority.useTls ? 1 : 0}`;
 }
 
 export function buildWebShareUrl(origin: string, reference: string): string {

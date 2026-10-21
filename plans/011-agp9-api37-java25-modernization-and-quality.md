@@ -256,7 +256,7 @@ Expected: no targeted deprecated API matches, tests pass, and audit reports no r
 **Verify**:
 
 ```bash
-./gradlew :app:testDebugUnitTest --tests 'com.ayagmar.pimobile.ui.*' --tests 'com.ayagmar.pimobile.chat.*'
+./gradlew :app:testDebugUnitTest --tests 'dev.scdeal.freskiel.ui.*' --tests 'dev.scdeal.freskiel.chat.*'
 ./gradlew :app:compileDebugAndroidTestKotlin :app:lintDebug
 ```
 
@@ -274,7 +274,7 @@ Expected: UI/state tests pass, Android test sources compile, and lint finds no a
 **Verify**:
 
 ```bash
-./gradlew :app:testDebugUnitTest --tests 'com.ayagmar.pimobile.chat.*' --tests 'com.ayagmar.pimobile.ui.chat.*'
+./gradlew :app:testDebugUnitTest --tests 'dev.scdeal.freskiel.chat.*' --tests 'dev.scdeal.freskiel.ui.chat.*'
 ./gradlew :app:compileDebugAndroidTestKotlin
 ./gradlew :benchmark:tasks --all
 ```

@@ -15,7 +15,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "pi-mobile"
+rootProject.name = "FRESKIEL"
 include(":app")
 include(":core-rpc")
 include(":core-net")

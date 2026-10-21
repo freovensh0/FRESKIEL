@@ -1,0 +1,4 @@
+FRESKIEL is a fork of pi-mobile (https://github.com/ayagmar/pi-mobile),
+Copyright (c) 2026 Abdeslam Yassine Agmar, used under the MIT License.
+
+Changes since the fork: rebranding, package rename, and the Android assistant layer.

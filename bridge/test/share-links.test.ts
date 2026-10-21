@@ -35,7 +35,7 @@ describe("share links", () => {
     it("generates only locator authority version and opaque reference", () => {
         const custom = buildCustomShareUri(reference, { host: "Example.COM.", port: 8787, useTls: true });
         const web = buildWebShareUrl("https://share.example.test", reference);
-        expect(custom).toBe(`pimobile://open/v1/${reference}?host=example.com&port=8787&tls=1`);
+        expect(custom).toBe(`freskiel://open/v1/${reference}?host=example.com&port=8787&tls=1`);
         expect(web).toBe(`https://share.example.test/s/v1/${reference}`);
         for (const secret of ["session-id", "bridge-token", "/private/path", "profile-id", "transcript"]) {
             expect(`${custom}${web}`).not.toContain(secret);
@@ -45,7 +45,7 @@ describe("share links", () => {
     it("renders one metadata-free self-hosted page with required headers", () => {
         const page = buildShareLandingPage("https://share.example.test", reference);
         expect(page).toContain("Open in Pi Mobile");
-        expect(page).toContain(`pimobile://open/v1/${reference}?host=share.example.test&amp;port=443&amp;tls=1`);
+        expect(page).toContain(`freskiel://open/v1/${reference}?host=share.example.test&amp;port=443&amp;tls=1`);
         for (const metadata of ["session-id", "/home/operator", "cwd", "preview", "title from session", "token"]) {
             expect(page).not.toContain(metadata);
         }
