@@ -78,6 +78,7 @@ import java.util.concurrent.ConcurrentHashMap
 @Suppress("TooManyFunctions", "LargeClass")
 class RpcSessionController(
     private val clientId: String,
+    private val lastSessionStore: LastSessionStore = InMemoryLastSessionStore(),
     private val connectionFactory: () -> PiRpcConnection = { PiRpcConnection() },
     private val connectTimeoutMs: Long = DEFAULT_TIMEOUT_MS,
     private val requestTimeoutMs: Long = DEFAULT_TIMEOUT_MS,
@@ -189,6 +190,13 @@ class RpcSessionController(
                         token = token,
                         cwd = session.cwd,
                     )
+                lastSessionStore.set(
+                    LastSession(
+                        hostId = hostProfile.id,
+                        sessionPath = session.sessionPath,
+                        cwd = session.cwd,
+                    ),
+                )
                 runCatching {
                     PerformanceMetrics.recordOperation(
                         operation = "resume_control_ready",
@@ -744,6 +752,8 @@ class RpcSessionController(
     override suspend fun getClientId(): String {
         return clientId
     }
+
+    override fun getLastResumedSession(): LastSession? = lastSessionStore.get()
 
     override suspend fun getLastAssistantText(): Result<String?> {
         return mutex.withLock {

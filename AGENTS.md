@@ -20,6 +20,9 @@ English string stays next to it.
   UI to the existing composer. No session state lives in the service.
 - Assist screenshots and text are read only after an explicit assist gesture. They go to the app
   cache, are never persisted, logged, or uploaded anywhere except the paired bridge.
+- A file from the phone reaches the agent through the bridge: the phone sends `bridge_upload_file`,
+  the bridge writes it under its state directory and returns the path, and the prompt carries that
+  path. Never paste file contents into a prompt.
 - Tokens live in the Android Keystore. They must not enter preferences, backups, logs or fixtures.
   Never print authorization headers or `.env` contents.
 - One signing key signs every build, so updates install over each other. The key stays outside the

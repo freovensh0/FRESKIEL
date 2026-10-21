@@ -66,8 +66,9 @@ screenshot in the app cache, and opens the composer with the screen text and the
 - Screenshots are taken only after the assist gesture; nothing is captured in the background.
 - The shot is written to `cache/shared-images/` and removed when the composer sends or the app clears
   its cache.
-- If no chat is open, the app lands on the session list; opening a session applies the pending text
-  and shot to that composer.
+- If no chat is open, the app resumes the session that was used last and opens its composer. When
+  there is none, the app lands on the session list; opening a session applies the pending text and
+  shot to that composer.
 - Photo attachment uses the system photo picker. Generic file attachment needs an upload endpoint on
   the bridge and is not wired yet.
 
@@ -76,6 +77,8 @@ screenshot in the app cache, and opens the composer with the screen text and the
 - Session list, resume, fork/tree navigation, model picker, slash commands.
 - Streaming answers, thinking blocks, tool output with collapse/expand.
 - Image attachments from the photo picker and shared files.
+- File attachments: the phone uploads the file to the bridge machine and the prompt carries the
+  path the agent reads. Files up to 10 MB.
 - Host profiles, QR pairing, token storage in the Android Keystore.
 - Dark and light themes.
 

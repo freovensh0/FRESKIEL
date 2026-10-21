@@ -428,8 +428,9 @@ private fun AssistNavigationEffect(
     sessionController: SessionController,
     onOpenChat: () -> Unit,
 ) {
-    LaunchedEffect(payload) {
-        if (payload != null && sessionController.activeSession.value?.sessionKey != null) {
+    val activeSession by sessionController.activeSession.collectAsStateWithLifecycle()
+    LaunchedEffect(payload, activeSession) {
+        if (payload != null && activeSession?.sessionKey != null) {
             onOpenChat()
         }
     }

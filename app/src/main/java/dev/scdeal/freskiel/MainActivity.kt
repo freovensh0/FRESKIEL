@@ -50,6 +50,7 @@ class MainActivity : ComponentActivity() {
         )
         intent.removeExtra(EXTRA_ASSIST_TEXT)
         intent.removeExtra(EXTRA_ASSIST_SCREENSHOT)
+        lifecycleScope.launch { appGraph.resumeLastSession() }
     }
 
     companion object {

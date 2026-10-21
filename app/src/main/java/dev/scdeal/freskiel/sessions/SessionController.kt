@@ -130,6 +130,8 @@ interface SessionController {
 
     suspend fun getClientId(): String
 
+    fun getLastResumedSession(): LastSession?
+
     suspend fun getLastAssistantText(): Result<String?>
 
     suspend fun importSessionJsonl(
