@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -64,7 +65,7 @@ class WebSocketTransportIntegrationTest {
             } finally {
                 collectorJob.cancel()
                 transport.disconnect()
-                server.close()
+                closeServer(server)
             }
         }
 
@@ -117,7 +118,7 @@ class WebSocketTransportIntegrationTest {
                 }
             } finally {
                 transport.disconnect()
-                server.close()
+                closeServer(server)
             }
         }
     }
@@ -183,7 +184,7 @@ class WebSocketTransportIntegrationTest {
             } finally {
                 collectorJob.cancel()
                 transport.disconnect()
-                server.close()
+                closeServer(server)
             }
         }
 
@@ -194,6 +195,12 @@ class WebSocketTransportIntegrationTest {
                 transport.inboundMessages.collect { messages.send(it) }
             }
         return messages to job
+    }
+
+    /** The mock server waits for the socket to go away; the client may still be closing it. */
+    private suspend fun closeServer(server: MockWebServer) {
+        delay(CLOSE_GRACE_MS)
+        runCatching { server.close() }
     }
 
     private fun targetFor(
@@ -217,5 +224,6 @@ class WebSocketTransportIntegrationTest {
 
     companion object {
         private const val TIMEOUT_MS = 5_000L
+        private const val CLOSE_GRACE_MS = 200L
     }
 }
