@@ -423,7 +423,6 @@ internal fun PromptInputRow(
 }
 
 @Composable
-@Composable
 private fun FileAttachmentStrip(
     files: List<PendingFile>,
     onRemove: (Int) -> Unit,
@@ -478,6 +477,7 @@ internal fun readPendingFile(
     )
 }
 
+@Composable
 private fun ImageAttachmentStrip(
     images: List<PendingImage>,
     onRemove: (Int) -> Unit,
