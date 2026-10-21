@@ -63,6 +63,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.scdeal.freskiel.assistant.AssistPayloadStore
 import dev.scdeal.freskiel.chat.ChatTimelineItem
 import dev.scdeal.freskiel.chat.ChatUiState
 import dev.scdeal.freskiel.chat.ChatViewModel
@@ -183,6 +184,7 @@ internal data class PromptControlsCallbacks(
 fun ChatRoute(
     sessionController: SessionController,
     showExtensionStatusStrip: Boolean,
+    assistPayloadStore: AssistPayloadStore,
 ) {
     val context = LocalContext.current
     val clipboard = LocalClipboard.current
@@ -196,6 +198,9 @@ fun ChatRoute(
             )
         }
     val chatViewModel: ChatViewModel = viewModel(factory = factory)
+    LaunchedEffect(chatViewModel) {
+        assistPayloadStore.take()?.let(chatViewModel::applyAssist)
+    }
     val lifecycleOwner = LocalLifecycleOwner.current
     val uiState by chatViewModel.uiState.collectAsStateWithLifecycle()
 

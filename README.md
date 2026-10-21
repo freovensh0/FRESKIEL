@@ -44,14 +44,19 @@ adb install -r /tmp/freskiel/app-debug.apk
 
 The development machine does not need an Android SDK; CI is the build machine.
 
-## Assistant role (in progress)
+## Assistant role
 
-- `VoiceInteractionService` + `VoiceInteractionSessionService` declared and selectable under
-  **Settings → Apps → Default apps → Digital assistant app**.
-- The assist gesture opens the composer with the current screen's text and screenshot pre-attached.
-- Photo capture, screenshot share and document picker feed the same attachment pipeline.
+Set FRESKIEL under **Settings → Apps → Default apps → Digital assistant app**. The assist gesture
+(long-press home, or the gesture your ROM uses) asks the system for the focused screen, stores one
+screenshot in the app cache, and opens the composer with the screen text and the screenshot attached.
 
-Until that lands, launch FRESKIEL from the launcher.
+- Screenshots are taken only after the assist gesture; nothing is captured in the background.
+- The shot is written to `cache/shared-images/` and removed when the composer sends or the app clears
+  its cache.
+- If no chat is open, the app lands on the session list; opening a session applies the pending text
+  and shot to that composer.
+- Photo attachment uses the system photo picker. Generic file attachment needs an upload endpoint on
+  the bridge and is not wired yet.
 
 ## What works today
 

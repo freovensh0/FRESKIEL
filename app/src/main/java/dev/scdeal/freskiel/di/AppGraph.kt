@@ -1,6 +1,7 @@
 package dev.scdeal.freskiel.di
 
 import android.content.Context
+import dev.scdeal.freskiel.assistant.AssistPayloadStore
 import dev.scdeal.freskiel.coresessions.FileSessionIndexCache
 import dev.scdeal.freskiel.coresessions.SessionIndexRepository
 import dev.scdeal.freskiel.hosts.ConnectionDiagnostics
@@ -28,6 +29,8 @@ class AppGraph(
     val clientIdentityStore: ClientIdentityStore by lazy {
         SharedPreferencesClientIdentityStore(appContext)
     }
+
+    val assistPayloadStore = AssistPayloadStore()
 
     val sessionController: SessionController by lazy {
         RpcSessionController(clientId = clientIdentityStore.getClientId())

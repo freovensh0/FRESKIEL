@@ -1,8 +1,10 @@
 package dev.scdeal.freskiel.chat
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.scdeal.freskiel.assistant.AssistPayload
 import dev.scdeal.freskiel.corenet.ConnectionState
 import dev.scdeal.freskiel.corerpc.AgentEndEvent
 import dev.scdeal.freskiel.corerpc.AgentSettledEvent
@@ -44,6 +46,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
+import java.io.File
 import java.util.UUID
 
 internal const val HISTORY_WINDOW_MAX_ITEMS = 1_200
@@ -2719,6 +2722,19 @@ class ChatViewModel(
 
     private fun hiddenHistoryCount(): Int {
         return visibleTimelineStartIndex() + historyParsedStartIndex
+    }
+
+    fun applyAssist(payload: AssistPayload) {
+        payload.text?.let(::onInputTextChanged)
+        val path = payload.screenshotPath ?: return
+        addImage(
+            PendingImage(
+                uri = Uri.fromFile(File(path)).toString(),
+                mimeType = "image/png",
+                sizeBytes = payload.screenshotSizeBytes,
+                displayName = "Screenshot",
+            ),
+        )
     }
 
     fun addImage(pendingImage: PendingImage) {

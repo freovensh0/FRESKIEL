@@ -228,6 +228,7 @@ fun PiMobileApp(appGraph: AppGraph) {
         val navController = rememberNavController()
         val shareCoordinator = appGraph.shareNavigationCoordinator
         val shareNavigationState by shareCoordinator.state.collectAsStateWithLifecycle()
+        val assistPayload by appGraph.assistPayloadStore.pending.collectAsStateWithLifecycle()
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
         val drawerState = androidx.compose.material3.rememberDrawerState(DrawerValue.Closed)
@@ -240,6 +241,12 @@ fun PiMobileApp(appGraph: AppGraph) {
                 popUpTo(navController.graph.startDestinationId) {
                     saveState = true
                 }
+            }
+        }
+
+        LaunchedEffect(assistPayload) {
+            if (assistPayload != null && appGraph.sessionController.activeSession.value?.sessionKey != null) {
+                navigateTo("chat")
             }
         }
 
@@ -401,6 +408,7 @@ fun PiMobileApp(appGraph: AppGraph) {
                                         ChatRoute(
                                             sessionController = appGraph.sessionController,
                                             showExtensionStatusStrip = showExtensionStatusStrip,
+                                            assistPayloadStore = appGraph.assistPayloadStore,
                                         )
                                     }
                                     composable(route = "settings") {
