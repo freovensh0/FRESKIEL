@@ -10,15 +10,16 @@ plugins {
 
 // The signing key is not in the repository. CI reads it from the secrets, a local build from
 // FRESKIEL_KEYSTORE_PATH and the passwords in ~/.gradle/gradle.properties.
-val keystorePath =
+val signingKeystorePath =
     providers.gradleProperty("freskiel.keystorePath").orNull ?: System.getenv("FRESKIEL_KEYSTORE_PATH")
-val keystorePassword =
+val signingStorePassword =
     providers.gradleProperty("freskiel.keystorePassword").orNull ?: System.getenv("FRESKIEL_KEYSTORE_PASSWORD")
-val keyAlias =
+val signingKeyAlias =
     providers.gradleProperty("freskiel.keyAlias").orNull ?: System.getenv("FRESKIEL_KEY_ALIAS")
-val keyPassword =
+val signingKeyPassword =
     providers.gradleProperty("freskiel.keyPassword").orNull ?: System.getenv("FRESKIEL_KEY_PASSWORD")
-val hasSigningKey = listOf(keystorePath, keystorePassword, keyAlias, keyPassword).all { !it.isNullOrBlank() }
+val hasSigningKey =
+    listOf(signingKeystorePath, signingStorePassword, signingKeyAlias, signingKeyPassword).all { !it.isNullOrBlank() }
 
 android {
     namespace = "dev.scdeal.freskiel"
@@ -38,10 +39,10 @@ android {
     signingConfigs {
         if (hasSigningKey) {
             create("freskiel") {
-                storeFile = file(keystorePath!!)
-                storePassword = keystorePassword
-                keyAlias = keyAlias
-                keyPassword = keyPassword
+                storeFile = file(signingKeystorePath!!)
+                storePassword = signingStorePassword
+                keyAlias = signingKeyAlias
+                keyPassword = signingKeyPassword
             }
         }
     }
