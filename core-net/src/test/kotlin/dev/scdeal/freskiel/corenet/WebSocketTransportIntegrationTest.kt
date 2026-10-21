@@ -1,8 +1,11 @@
 package dev.scdeal.freskiel.corenet
 
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -45,13 +48,7 @@ class WebSocketTransportIntegrationTest {
             server.start()
 
             val transport = WebSocketTransport(client = OkHttpClient())
-            val inboundMessages = Channel<String>(Channel.UNLIMITED)
-            val collectorJob =
-                launch {
-                    transport.inboundMessages.collect { message ->
-                        inboundMessages.send(message)
-                    }
-                }
+            val (inboundMessages, collectorJob) = collectInbound(transport)
 
             try {
                 transport.connect(targetFor(server))
@@ -167,16 +164,10 @@ class WebSocketTransportIntegrationTest {
             server.start()
 
             val transport = WebSocketTransport(client = OkHttpClient())
-            val inboundMessages = Channel<String>(Channel.UNLIMITED)
-            val collectorJob =
-                launch {
-                    transport.inboundMessages.collect { message ->
-                        inboundMessages.send(message)
-                    }
-                }
+            val (inboundMessages, collectorJob) = collectInbound(transport)
 
             try {
-                transport.connect(targetFor(server))
+                transport.connect(targetFor(server, reconnectInitialDelayMs = 500))
 
                 awaitState(transport, ConnectionState.CONNECTED)
                 assertEquals("server-first", withTimeout(TIMEOUT_MS) { inboundMessages.receive() })
@@ -196,11 +187,27 @@ class WebSocketTransportIntegrationTest {
             }
         }
 
-    private fun targetFor(server: MockWebServer): WebSocketTarget =
+    private suspend fun CoroutineScope.collectInbound(transport: WebSocketTransport): Pair<Channel<String>, Job> {
+        val messages = Channel<String>(Channel.UNLIMITED)
+        val subscribed = CompletableDeferred<Unit>()
+        val job =
+            launch {
+                transport.inboundMessages
+                    .onSubscription { subscribed.complete(Unit) }
+                    .collect { messages.send(it) }
+            }
+        subscribed.await()
+        return messages to job
+    }
+
+    private fun targetFor(
+        server: MockWebServer,
+        reconnectInitialDelayMs: Long = 25,
+    ): WebSocketTarget =
         WebSocketTarget(
             url = server.url("/ws").toString(),
-            reconnectInitialDelayMs = 25,
-            reconnectMaxDelayMs = 50,
+            reconnectInitialDelayMs = reconnectInitialDelayMs,
+            reconnectMaxDelayMs = reconnectInitialDelayMs * 2,
         )
 
     private suspend fun awaitState(

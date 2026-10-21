@@ -48,8 +48,8 @@ class MainActivity : ComponentActivity() {
                 screenshotSizeBytes = screenshotPath?.let { java.io.File(it).length() } ?: 0L,
             ),
         )
-        intent?.removeExtra(EXTRA_ASSIST_TEXT)
-        intent?.removeExtra(EXTRA_ASSIST_SCREENSHOT)
+        intent.removeExtra(EXTRA_ASSIST_TEXT)
+        intent.removeExtra(EXTRA_ASSIST_SCREENSHOT)
     }
 
     companion object {
