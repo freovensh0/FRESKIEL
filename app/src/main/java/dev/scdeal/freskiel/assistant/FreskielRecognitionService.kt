@@ -2,6 +2,7 @@ package dev.scdeal.freskiel.assistant
 
 import android.content.Intent
 import android.speech.RecognitionService
+import android.speech.SpeechRecognizer
 
 /**
  * The system refuses to list an app as the digital assistant without a recognition service next to
@@ -11,8 +12,16 @@ import android.speech.RecognitionService
 class FreskielRecognitionService : RecognitionService() {
     override fun onStartListening(
         recognizerIntent: Intent?,
-        args: Intent?,
+        listener: RecognitionService.Callback?,
     ) {
-        onError(ERROR_CANNOT_CHECK_SUPPORT)
+        listener?.onError(SpeechRecognizer.ERROR_CANNOT_CHECK_SUPPORT)
+    }
+
+    override fun onCancel(listener: RecognitionService.Callback?) {
+        listener?.onError(SpeechRecognizer.ERROR_CLIENT)
+    }
+
+    override fun onStopListening(listener: RecognitionService.Callback?) {
+        Unit
     }
 }

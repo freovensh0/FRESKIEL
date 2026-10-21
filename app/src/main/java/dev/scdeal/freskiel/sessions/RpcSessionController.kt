@@ -823,7 +823,11 @@ class RpcSessionController(
                 UploadedFile(
                     path = bridgeResponse.payload.stringField("path") ?: error("Upload did not return a path"),
                     name = bridgeResponse.payload.stringField("name") ?: fileName,
-                    sizeBytes = bridgeResponse.payload.intField("sizeBytes")?.toLong() ?: 0L,
+                    sizeBytes =
+                        bridgeResponse.payload["sizeBytes"]
+                            ?.jsonPrimitive
+                            ?.contentOrNull
+                            ?.toLongOrNull() ?: 0L,
                 )
             }
         }
