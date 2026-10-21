@@ -149,8 +149,9 @@ private fun AssistantCard() {
             style = MaterialTheme.typography.titleMedium,
         )
         Text(
-            text = "Set FRESKIEL as the digital assistant to reach the composer from the assist gesture. " +
-                "The focused screen's text and one screenshot are attached when the gesture starts.",
+            text =
+                "Set FRESKIEL as the digital assistant to reach the composer from the assist gesture. " +
+                    "The focused screen's text and one screenshot are attached when the gesture starts.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
