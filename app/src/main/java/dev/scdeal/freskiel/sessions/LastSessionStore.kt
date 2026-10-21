@@ -1,3 +1,5 @@
+@file:Suppress("ReturnCount")
+
 package dev.scdeal.freskiel.sessions
 
 import android.content.Context

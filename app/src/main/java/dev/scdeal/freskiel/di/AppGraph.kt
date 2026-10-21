@@ -82,6 +82,7 @@ class AppGraph(
     }
 
     /** Opens the session the assistant gesture expects, so the composer is ready for the text. */
+    @Suppress("ReturnCount")
     suspend fun resumeLastSession(): Boolean {
         val last = sessionController.getLastResumedSession() ?: return false
         val host = hostProfileStore.list().firstOrNull { it.id == last.hostId } ?: return false

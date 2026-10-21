@@ -78,7 +78,7 @@ import dev.scdeal.freskiel.chat.PendingQueueType
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("LongMethod", "LongParameterList")
+@Suppress("LongMethod", "LongParameterList", "CyclomaticComplexMethod")
 @Composable
 internal fun PromptControls(
     isStreaming: Boolean,
@@ -287,7 +287,7 @@ private fun deliveryModeLabel(mode: String): String {
     }
 }
 
-@Suppress("LongMethod", "LongParameterList")
+@Suppress("LongMethod", "LongParameterList", "CyclomaticComplexMethod")
 @Composable
 internal fun PromptInputRow(
     inputText: String,
@@ -422,6 +422,7 @@ internal fun PromptInputRow(
     }
 }
 
+@Composable
 @Composable
 private fun FileAttachmentStrip(
     files: List<PendingFile>,

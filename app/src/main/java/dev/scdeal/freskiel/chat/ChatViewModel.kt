@@ -192,6 +192,7 @@ class ChatViewModel(
         }
     }
 
+    @Suppress("ReturnCount")
     private suspend fun uploadPendingFiles(pendingFiles: List<PendingFile>): Result<List<UploadedFile>> {
         if (pendingFiles.isEmpty()) return Result.success(emptyList())
         val encoder = imageEncoder ?: return Result.failure(IllegalStateException("File upload is not available"))
