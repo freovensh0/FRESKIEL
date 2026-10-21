@@ -1,9 +1,11 @@
 package dev.scdeal.freskiel.ui.settings
 
 import android.app.role.RoleManager
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -159,16 +161,12 @@ private fun AssistantCard() {
         PiButton(
             label = "Open assistant settings",
             onClick = {
-                val roleManager =
+                val roleIntent =
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        context.getSystemService(RoleManager::class.java)
+                        assistantRoleIntent(context)
                     } else {
                         null
                     }
-                val roleIntent =
-                    roleManager
-                        ?.takeIf { it.isRoleAvailable(RoleManager.ROLE_ASSISTANT) }
-                        ?.createRequestRoleIntent(RoleManager.ROLE_ASSISTANT)
                 val intent =
                     roleIntent
                         ?: if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -181,6 +179,13 @@ private fun AssistantCard() {
             modifier = Modifier.padding(top = PiSpacing.sm),
         )
     }
+}
+
+@RequiresApi(Build.VERSION_CODES.Q)
+private fun assistantRoleIntent(context: Context): Intent? {
+    val roleManager = context.getSystemService(RoleManager::class.java) ?: return null
+    if (!roleManager.isRoleAvailable(RoleManager.ROLE_ASSISTANT)) return null
+    return roleManager.createRequestRoleIntent(RoleManager.ROLE_ASSISTANT)
 }
 
 @Composable
