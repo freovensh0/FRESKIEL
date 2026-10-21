@@ -34,11 +34,11 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import dev.scdeal.freskiel.R
-import dev.scdeal.freskiel.chat.EditDiffInfo
 import com.github.difflib.DiffUtils
 import com.github.difflib.patch.AbstractDelta
 import com.github.difflib.patch.DeltaType
+import dev.scdeal.freskiel.R
+import dev.scdeal.freskiel.chat.EditDiffInfo
 import io.noties.prism4j.AbsVisitor
 import io.noties.prism4j.Prism4j
 import kotlinx.coroutines.Dispatchers

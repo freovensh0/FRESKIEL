@@ -36,6 +36,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.CommonStatusCodes
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import dev.scdeal.freskiel.hosts.ConnectionDiagnostics
 import dev.scdeal.freskiel.hosts.DiagnosticStatus
 import dev.scdeal.freskiel.hosts.DiagnosticsResult
@@ -48,11 +53,6 @@ import dev.scdeal.freskiel.hosts.HostsViewModel
 import dev.scdeal.freskiel.hosts.HostsViewModelFactory
 import dev.scdeal.freskiel.hosts.parseHostPairingPayload
 import dev.scdeal.freskiel.hosts.toRecoveryMessage
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.CommonStatusCodes
-import com.google.mlkit.vision.barcode.common.Barcode
-import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
-import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 
 @Composable
 fun HostsRoute(

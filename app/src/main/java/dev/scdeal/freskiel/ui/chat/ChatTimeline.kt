@@ -68,12 +68,12 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import dev.jeziellago.compose.markdowntext.MarkdownText
 import dev.scdeal.freskiel.chat.ChatImageSource
 import dev.scdeal.freskiel.chat.ChatTimelineItem
 import dev.scdeal.freskiel.chat.ChatTurn
 import dev.scdeal.freskiel.chat.ChatTurnSection
 import dev.scdeal.freskiel.chat.projectChatTurns
-import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
