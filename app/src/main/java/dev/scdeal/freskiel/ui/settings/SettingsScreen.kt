@@ -1,5 +1,6 @@
 package dev.scdeal.freskiel.ui.settings
 
+import android.app.role.RoleManager
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
@@ -158,12 +159,23 @@ private fun AssistantCard() {
         PiButton(
             label = "Open assistant settings",
             onClick = {
-                val intent =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)
+                val roleManager =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        context.getSystemService(RoleManager::class.java)
                     } else {
-                        Intent(Settings.ACTION_VOICE_INPUT_SETTINGS)
+                        null
                     }
+                val roleIntent =
+                    roleManager
+                        ?.takeIf { it.isRoleAvailable(RoleManager.ROLE_ASSISTANT) }
+                        ?.createRequestRoleIntent(RoleManager.ROLE_ASSISTANT)
+                val intent =
+                    roleIntent
+                        ?: if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)
+                        } else {
+                            Intent(Settings.ACTION_VOICE_INPUT_SETTINGS)
+                        }
                 runCatching { context.startActivity(intent) }
             },
             modifier = Modifier.padding(top = PiSpacing.sm),
