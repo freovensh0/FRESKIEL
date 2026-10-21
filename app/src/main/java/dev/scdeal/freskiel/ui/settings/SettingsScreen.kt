@@ -182,6 +182,7 @@ private fun AssistantCard() {
 }
 
 @RequiresApi(Build.VERSION_CODES.Q)
+@Suppress("ReturnCount")
 private fun assistantRoleIntent(context: Context): Intent? {
     val roleManager = context.getSystemService(RoleManager::class.java) ?: return null
     if (!roleManager.isRoleAvailable(RoleManager.ROLE_ASSISTANT)) return null
